@@ -219,13 +219,13 @@
         dragItem: function (item) {
 
           return {
-            index: item.index(),
-            parent: item.sortableScope,
+            index: (typeof item.index === 'function')? item.index() : item.index,
+            parent: (item.sortableScope) ? item.sortableScope : item.parent(),
             source: item,
             targetElement: null,
             targetElementOffset: null,
             sourceInfo: {
-              index: item.index(),
+              index: (typeof item.index === 'function')? item.index() : item.index,
               itemScope: item.itemScope,
               sortableScope: item.sortableScope
             },
@@ -255,7 +255,7 @@
               this.index = index;
             },
             isSameParent: function () {
-              return this.parent.element === this.sourceInfo.sortableScope.element;
+              return (this.sourceInfo.sortableScope) ? this.parent.element === this.sourceInfo.sortableScope.element : true;
             },
             isOrderChanged: function () {
               return this.index !== this.sourceInfo.index;
@@ -275,9 +275,9 @@
                 this.sourceInfo.sortableScope.removeItem(this.sourceInfo.index);
 
                 // if the dragged item is not already there, insert the item. This avoids ng-repeat dupes error
-                if (this.parent.options.allowDuplicates || this.parent.modelValue.indexOf(this.source.modelValue) < 0) {
+//                if (this.parent.options.allowDuplicates || this.parent.modelValue.indexOf(this.source.modelValue) < 0) {
                   this.parent.insertItem(this.index, this.source.modelValue);
-                }
+//                }
               } else if (!this.parent.options.clone) { // prevent drop inside sortables that specify options.clone = true
                 // clone the model value as well
                 this.parent.insertItem(this.index, angular.copy(this.source.modelValue));

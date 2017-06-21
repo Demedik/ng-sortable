@@ -80,7 +80,7 @@
    * sortOptions also includes a longTouch option which activates longTouch when set to true (default is false).
    */
   mainModule.directive('asSortable',
-    function () {
+        function ($rootScope) {
       return {
         require: 'ngModel', // get a hold of NgModelController
         restrict: 'A',
@@ -95,11 +95,25 @@
           if (!ngModel) {
             return; // do nothing if no ng-model
           }
-
+          console.log('scope, element, attrs',scope, element, attrs);
           // Set the model value in to scope.
           ngModel.$render = function () {
             scope.modelValue = ngModel.$modelValue;
           };
+          
+          $rootScope.$on('asSortable-sorted',function (ev,data) {
+              
+              var modelValueBeforeChange = ngModel.$modelValue;
+              var startObj = JSON.parse(JSON.stringify(modelValueBeforeChange[data.startIndex]));
+              var targetObj = JSON.parse(JSON.stringify(modelValueBeforeChange[data.targetIndex]));
+
+              ngModel.$modelValue[data.startIndex] = targetObj;
+              ngModel.$modelValue[data.targetIndex] = startObj;
+              
+              if (!scope.$$phase){ 
+                  scope.$apply();
+              }
+          });
           //set the element in scope to be accessed by its sub scope.
           scope.element = element;
           element.data('_scope',scope); // #144, work with angular debugInfoEnabled(false)

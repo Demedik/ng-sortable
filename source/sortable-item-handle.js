@@ -35,8 +35,8 @@
   /**
    * Directive for sortable item handle.
    */
-  mainModule.directive('asSortableItemHandle', ['sortableConfig', '$helper', '$window', '$document', '$timeout',
-    function (sortableConfig, $helper, $window, $document, $timeout) {
+  mainModule.directive('asSortableItemHandle', ['sortableConfig', '$helper', '$window', '$document', '$timeout','$rootScope',
+    function (sortableConfig, $helper, $window, $document, $timeout, $rootScope) {
       return {
         require: '^asSortableItem',
         scope: true,
@@ -73,7 +73,10 @@
             isPlaceHolderPresent,//is placeholder present.
             isDisabled = false, // drag enabled
             escapeListen, // escape listen event
-            isLongTouch = false; //long touch disabled.
+            isLongTouch = false,
+            targetIndex,
+            tgElement,
+            startIndex; //long touch disabled.
 
           hasTouch = 'ontouchstart' in $window;
           isIOS = /iPad|iPhone|iPod/.test($window.navigator.userAgent) && !$window.MSStream;
@@ -214,12 +217,12 @@
 
             placeHolder = createPlaceholder(scope.itemScope)
               .addClass(sortableConfig.placeHolderClass).addClass(scope.sortableScope.options.additionalPlaceholderClass);
-            placeHolder.css('width', $helper.width(scope.itemScope.element) + 'px');
-            placeHolder.css('height', $helper.height(scope.itemScope.element) + 'px');
+//            placeHolder.css('width', $helper.width(scope.itemScope.element) + 'px');
+//            placeHolder.css('height', $helper.height(scope.itemScope.element) + 'px');
 
             placeElement = angular.element($document[0].createElement(tagName));
             if (sortableConfig.hiddenClass) {
-              placeElement.addClass(sortableConfig.hiddenClass);
+//              placeElement.addClass(sortableConfig.hiddenClass);
             }
 
             itemPosition = $helper.positionStarted(eventObj, scope.itemScope.element, scrollableContainer);
@@ -242,7 +245,7 @@
 
             containment.append(dragElement);
             $helper.movePosition(eventObj, dragElement, itemPosition, containment, containerPositioning, scrollableContainer);
-
+            startIndex = dragItemInfo.eventArgs().source.index;
             scope.sortableScope.$apply(function () {
               scope.callbacks.dragStart(dragItemInfo.eventArgs());
             });
@@ -256,7 +259,6 @@
            * @return boolean - true if element is draggable.
            */
           isDraggable = function (event) {
-
             var elementClicked, sourceScope, isDraggable;
 
             elementClicked = angular.element(event.target);
@@ -284,13 +286,13 @@
            */
           function insertBefore(targetElement, targetScope) {
             // Ensure the placeholder is visible in the target (unless it's a table row)
-            if (placeHolder.css('display') !== 'table-row') {
-              placeHolder.css('display', 'block');
-            }
-            if (!targetScope.sortableScope.options.clone) {
-              targetElement[0].parentNode.insertBefore(placeHolder[0], targetElement[0]);
-              dragItemInfo.moveTo(targetScope.sortableScope, targetScope.index());
-            }
+//            if (placeHolder.css('display') !== 'table-row') {
+//              placeHolder.css('display', 'block');
+//            }
+//            if (!targetScope.sortableScope.options.clone) {
+//              targetElement[0].parentNode.insertBefore(placeHolder[0], targetElement[0]);
+//              dragItemInfo.moveTo(targetScope.sortableScope, targetScope.index());
+//            }
           }
 
           /**
@@ -301,13 +303,13 @@
            */
           function insertAfter(targetElement, targetScope) {
             // Ensure the placeholder is visible in the target (unless it's a table row)
-            if (placeHolder.css('display') !== 'table-row') {
-              placeHolder.css('display', 'block');
-            }
-            if (!targetScope.sortableScope.options.clone) {
-              targetElement.after(placeHolder);
-              dragItemInfo.moveTo(targetScope.sortableScope, targetScope.index() + 1);
-            }
+//            if (placeHolder.css('display') !== 'table-row') {
+//              placeHolder.css('display', 'block');
+//            }
+//            if (!targetScope.sortableScope.options.clone) {
+//              targetElement.after(placeHolder);
+//              dragItemInfo.moveTo(targetScope.sortableScope, targetScope.index() + 1);
+//            }
           }
 
           /**
@@ -376,15 +378,16 @@
                 }
 
                 var placeholderIndex = placeHolderIndex(targetScope.sortableScope.element);
-                if (placeholderIndex < 0) {
-                  insertBefore(targetElement, targetScope);
-                } else {
-                  if (placeholderIndex <= targetScope.index()) {
-                    insertAfter(targetElement, targetScope);
-                  } else {
-                    insertBefore(targetElement, targetScope);
-                  }
-                }
+                targetIndex = targetScope.index();
+//                if (placeholderIndex < 0) {
+//                  insertBefore(targetElement, targetScope);
+//                } else {
+//                  if (placeholderIndex <= targetScope.index()) {
+//                    insertAfter(targetElement, targetScope);
+//                  } else {
+//                    insertBefore(targetElement, targetScope);
+//                  }
+//                }
               }
 
               if (targetScope.type === 'sortable') {//sortable scope.
@@ -393,7 +396,7 @@
                   //moving over sortable bucket. not over item.
                   if (!isPlaceHolderPresent(targetElement) && !targetScope.options.clone) {
                     targetElement[0].appendChild(placeHolder[0]);
-                    dragItemInfo.moveTo(targetScope, targetScope.modelValue.length);
+//                    dragItemInfo.moveTo(targetScope, targetScope.modelValue.length);
                   }
                 }
               }
@@ -483,19 +486,20 @@
               rollbackDragChanges();
               // update model data
               dragItemInfo.apply();
-              scope.sortableScope.$apply(function () {
-                if (dragItemInfo.isSameParent()) {
-                  if (dragItemInfo.isOrderChanged()) {
-                    scope.callbacks.orderChanged(dragItemInfo.eventArgs());
-                  }
-                } else {
-                  scope.callbacks.itemMoved(dragItemInfo.eventArgs());
-                }
-              });
-              scope.sortableScope.$apply(function () {
-                scope.callbacks.dragEnd(dragItemInfo.eventArgs());
-              });
+//              scope.sortableScope.$apply(function () {
+//                if (dragItemInfo.isSameParent()) {
+//                  if (dragItemInfo.isOrderChanged()) {
+//                    scope.callbacks.orderChanged(dragItemInfo.eventArgs());
+//                  }
+//                } else {
+//                  scope.callbacks.itemMoved(dragItemInfo.eventArgs());
+//                }
+//              });
+//              scope.sortableScope.$apply(function () {
+//                scope.callbacks.dragEnd(dragItemInfo.eventArgs());
+//              });
               dragItemInfo = null;
+              $rootScope.$broadcast('asSortable-sorted',{startIndex:startIndex,targetIndex:targetIndex});
             }
             unBindEvents();
           };
